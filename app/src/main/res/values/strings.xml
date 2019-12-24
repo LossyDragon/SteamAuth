@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Steam Auth</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">Welcome Fragment</string>
+    <string name="second_fragment_label">TOTP Fragment</string>
+
+    <!-- Main Application Strings -->
+    <string name="fab_import_account">Import .maFile</string>
+    <string name="frag_welcome_text">Welcome!\nNo account found. Press the "Import .MaFile" button to open a dialog and choose your backup file</string>
+    <string name="action_info">Information</string>
+    <string name="action_delete">Delete Account</string>
+    <string name="toast_delete_failed">Something went wrong in deleting the account.\n Reinstall the app or clear data should fix this!</string>
+    <string name="dialog_delete_account_title">Delete Account</string>
+    <string name="dialog_delete_account_message">Are you sure you want to delete the saved account?\n
+        This will DELETE all data from the application and will close in order to be set up again for the first time.
+    </string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_exit">Exit</string>
+    <string name="dialog_info_title">Info</string>
+    <string name="dialog_info_message">Steam Auth is a basic application to easily display one time
+        codes [TOTP] via a .maFile from the official Steam app or other 3rd party apps.\n\n
+        This application nor the author is NOT affiliated with Steam™ in any way.\n\n
+        This application is to be used at your own risk! It does contain sensitive information to your steam account if allowed to import a .maFile.\n\n
+        The application is under the MIT license, complying with functions sampled from other apps.\n\n
+        Your .maFile should be backed up securely and safely via your own means. It contains your Revocation code to disable Steam Authenticator officially through Steam.\n\n
+        This application only requires Read Storage permissions. Used only for the dialog file picker.\n\n
+        Press OK to continue\n
+        Press EXIT to close the application.
+
+    </string>
+    <string name="action_select">Select</string>
+    <string name="dialog_add_account_title">Select .maFile</string>
+    <string name="button_revocation">Show Revocation Code</string>
+    <string name="toast_revocation">Revocation code: %s</string>
+    <string name="totp_title">Your Steam Guard code:</string>
+    <string name="totp_code_unknown">N/A</string>
+</resources>
