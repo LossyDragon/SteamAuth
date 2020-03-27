@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import com.lossydragon.steamauth.steamauth.SteamGuardAccount.generateSteamGuardCodeForTime
 import com.lossydragon.steamauth.utils.PrefsManager
 import kotlinx.android.synthetic.main.fragment_two_factor.*
-import java.util.*
 
 /**
  * The second [Fragment] to show when there is an account saved.
@@ -24,9 +23,15 @@ class SteamFragment : Fragment() {
     private lateinit var clipData: ClipData
     private lateinit var clipboardManager: ClipboardManager
 
-    private var secret: String? = null
-    private var name: String? = null
+    private lateinit var secret: String
+    private lateinit var name: String
     private var timeNewCode: Double = 10000.0
+
+    private val codeTime: Double
+        get() = 30.0 - System.currentTimeMillis() / 1000.0 % 30.0
+
+    private val currentTime: Long
+        get() = System.currentTimeMillis() / 1000L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +40,11 @@ class SteamFragment : Fragment() {
         name = PrefsManager.accountName
     }
 
+    // Inflate the layout for this fragment
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_two_factor, container, false)
-    }
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.fragment_two_factor, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,12 +54,11 @@ class SteamFragment : Fragment() {
 
         // Setup the Show Revocation button
         button_revocation.setOnClickListener {
-            val revocation = String.format(
-                    Locale.getDefault(),
-                    getString(R.string.toast_revocation),
-                    PrefsManager.revocationCode
-            )
-            Toast.makeText(context!!, revocation, Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context!!,
+                getString(R.string.toast_revocation, PrefsManager.revocationCode),
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         // Display the account name
@@ -65,48 +67,35 @@ class SteamFragment : Fragment() {
         // Set up long-click clipboard
         totp_code?.setOnLongClickListener {
             clipboardManager =
-                    context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipData = ClipData.newPlainText("Steam Guard", totp_code.text.toString())
+                context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipData =
+                ClipData.newPlainText(getString(R.string.clip_label), totp_code.text.toString())
             clipboardManager.setPrimaryClip(clipData)
 
-            Toast.makeText(view.context, "Copied!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(view.context, R.string.toast_copied, Toast.LENGTH_SHORT).show()
             true
         }
 
         // Start the auth generation
-        val handler = Handler()
-        val runnable = object : Runnable {
-            override fun run() {
-                if (secret != null) {
+        Handler().apply {
+            val runnable = object : Runnable {
+                override fun run() {
                     val validityTime = 30.0 - codeTime
-
                     totp_progress?.progress = (3000.0 * (validityTime / 30.0)).toInt()
 
                     val newCode = timeNewCode > validityTime
                     timeNewCode = validityTime
+
                     if (newCode) {
-                        handler.post {
-                            totp_code?.text = generateSteamGuardCodeForTime(secret!!, currentTime)
+                        this@apply.post {
+                            totp_code?.text = generateSteamGuardCodeForTime(secret, currentTime)
                         }
                     }
-                } else {
-                    totp_code.text = getString(R.string.totp_code_unknown)
+
+                    postDelayed(this, 50)
                 }
-
-                // Repeat handler
-                handler.postDelayed(this, 50)
             }
+            postDelayed(runnable, 50)
         }
-
-        // Kick start the handler.
-        handler.post(runnable)
-    }
-
-    companion object {
-        private val codeTime: Double
-            get() = 30.0 - System.currentTimeMillis() / 1000.0 % 30.0
-
-        private val currentTime: Long
-            get() = System.currentTimeMillis() / 1000L
     }
 }

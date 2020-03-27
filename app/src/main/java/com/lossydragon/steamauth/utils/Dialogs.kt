@@ -16,19 +16,19 @@ fun requestPermissionsReasoning() {
     // TODO
 }
 
-fun Activity.showInfo(callback: (boolean: Boolean) -> Unit) {
+fun Activity.showInfo() {
     MaterialDialog(this).show {
         title(R.string.dialog_info_title)
         message(R.string.dialog_info_message)
         positiveButton(R.string.action_ok) {
-            callback(false)
+            PrefsManager.firstTime = false
         }
         negativeButton(R.string.action_exit) {
-            callback(true)
+            PrefsManager.firstTime = true
             finishAffinity()
         }
         cancelOnTouchOutside(false)
-        onCancel { callback(true) }
+        onCancel { PrefsManager.firstTime = true }
     }
 }
 
@@ -39,7 +39,11 @@ fun Activity.addAccount() {
 
     MaterialDialog(this).show {
         title(R.string.dialog_add_account_title)
-        fileChooser(filter = fileFiler, waitForPositiveButton = true) { _, file ->
+        fileChooser(
+            context = context,
+            filter = fileFiler,
+            waitForPositiveButton = true
+        ) { _, file ->
             maFile = file.absolutePath
         }
         positiveButton(R.string.action_select) {

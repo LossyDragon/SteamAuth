@@ -7,6 +7,8 @@
     <string name="second_fragment_label">TOTP Fragment</string>
 
     <!-- Main Application Strings -->
+    <string name="toast_copied">Copied!</string>
+    <string name="clip_label">Steam Guard</string>
     <string name="fab_import_account">Import .maFile</string>
     <string name="frag_welcome_text">Welcome!\nNo account found. Press the "Import .MaFile" button to open a dialog and choose your backup file</string>
     <string name="action_info">Information</string>

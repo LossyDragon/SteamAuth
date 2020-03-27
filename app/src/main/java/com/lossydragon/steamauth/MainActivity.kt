@@ -42,9 +42,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_info -> {
-                showInfo { firstTime ->
-                    if (!firstTime) PrefsManager.firstTime = firstTime
-                }
+                showInfo()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -52,50 +50,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions() {
-        if (ContextCompat.checkSelfPermission(
-                this@MainActivity, READ_EXTERNAL_STORAGE
-            ) == PermissionChecker.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) ==
+                PermissionChecker.PERMISSION_GRANTED) {
             //Permission already Granted, go to file chooser dialog
             addAccount()
         } else {
             //Ask for permissions.
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this@MainActivity, READ_EXTERNAL_STORAGE
-                )
-            ) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
                 //Ask for permissions with reasoning.
                 requestPermissionsReasoning()
             } else {
                 //Ask for permissions, normal
-                ActivityCompat.requestPermissions(
-                    this@MainActivity, arrayOf(READ_EXTERNAL_STORAGE), 42
-                )
+                ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE), 42)
             }
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 42) {
             if (PrefsManager.firstTime) {
-                showInfo { firstTime ->
-                    if (!firstTime) {
-                        PrefsManager.firstTime = firstTime
-                        addAccount()
-                    }
-                }
+                showInfo()
             }
-
         }
     }
 
     // Return the FAB view object to a fragment
-    fun getFloatingActionButton(): ExtendedFloatingActionButton? {
-        return fab
-    }
+    fun getFloatingActionButton(): ExtendedFloatingActionButton? = fab
+
 }
