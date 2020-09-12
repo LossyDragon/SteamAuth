@@ -5,9 +5,11 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager.LayoutParams.FLAG_SECURE
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.lossydragon.steamauth.steamauth.SteamGuardAccount.generateSteamGuardCodeForTime
@@ -26,6 +28,8 @@ class SteamFragment : Fragment() {
     private lateinit var secret: String
     private lateinit var name: String
     private var timeNewCode: Double = 10000.0
+
+    private var looper = Looper.myLooper()
 
     private val codeTime: Double
         get() = 30.0 - System.currentTimeMillis() / 1000.0 % 30.0
@@ -52,10 +56,13 @@ class SteamFragment : Fragment() {
         // Hide the FAB as we don't need it in this view.
         (activity as MainActivity?)?.getFloatingActionButton()?.visibility = View.GONE
 
+        // Block screenshots and overview preview
+        requireActivity().window.setFlags(FLAG_SECURE, FLAG_SECURE)
+
         // Setup the Show Revocation button
         button_revocation.setOnClickListener {
             Toast.makeText(
-                context!!,
+                requireContext(),
                 getString(R.string.toast_revocation, PrefsManager.revocationCode),
                 Toast.LENGTH_LONG
             ).show()
@@ -77,7 +84,7 @@ class SteamFragment : Fragment() {
         }
 
         // Start the auth generation
-        Handler().apply {
+        Handler(looper!!).apply {
             val runnable = object : Runnable {
                 override fun run() {
                     val validityTime = 30.0 - codeTime

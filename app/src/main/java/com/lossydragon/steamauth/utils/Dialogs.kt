@@ -1,16 +1,10 @@
 package com.lossydragon.steamauth.utils
 
 import android.app.Activity
-import android.content.Context
 import android.widget.Toast
-import androidx.navigation.findNavController
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onCancel
-import com.afollestad.materialdialogs.files.FileFilter
-import com.afollestad.materialdialogs.files.fileChooser
 import com.lossydragon.steamauth.R
-import com.lossydragon.steamauth.steamauth.MaFileLoader
-import java.util.*
 
 fun requestPermissionsReasoning() {
     // TODO
@@ -30,29 +24,6 @@ fun Activity.showInfo() {
         cancelOnTouchOutside(false)
         onCancel { PrefsManager.firstTime = true }
     }
-}
-
-fun Activity.addAccount() {
-
-    val fileFiler: FileFilter = { it.isDirectory || it.name.endsWith(".maFile", true) }
-    var maFile: String? = null
-
-    MaterialDialog(this).show {
-        title(R.string.dialog_add_account_title)
-        fileChooser(
-            context = context,
-            filter = fileFiler,
-            waitForPositiveButton = true
-        ) { _, file ->
-            maFile = file.absolutePath
-        }
-        positiveButton(R.string.action_select) {
-            MaFileLoader.importMaFile(maFile)
-            findNavController(R.id.nav_host_fragment).navigate(R.id.SecondFragment)
-        }
-        negativeButton(R.string.action_cancel)
-    }
-
 }
 
 fun Activity.deleteAccount() {
