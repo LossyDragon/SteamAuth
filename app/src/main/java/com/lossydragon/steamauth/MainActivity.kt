@@ -48,17 +48,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete -> {
-                deleteAccount()
-                true
-            }
-            R.id.action_info -> {
-                showInfo()
-                true
-            }
+        when (item.itemId) {
+            R.id.action_delete -> deleteAccount()
+            R.id.action_info -> showInfo()
             else -> super.onOptionsItemSelected(item)
         }
+        return true
     }
 
     override fun onRequestPermissionsResult(

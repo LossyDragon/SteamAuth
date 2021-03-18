@@ -6,9 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams.FLAG_SECURE
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -20,7 +18,7 @@ import kotlinx.android.synthetic.main.fragment_two_factor.*
  * The second [Fragment] to show when there is an account saved.
  * Will display the account saved to the app and the current TOTP code for Steam Authentication.
  */
-class SteamFragment : Fragment() {
+class SteamFragment : Fragment(R.layout.fragment_two_factor) {
 
     private lateinit var clipData: ClipData
     private lateinit var clipboardManager: ClipboardManager
@@ -43,12 +41,6 @@ class SteamFragment : Fragment() {
         secret = PrefsManager.sharedSecret
         name = PrefsManager.accountName
     }
-
-    // Inflate the layout for this fragment
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_two_factor, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
