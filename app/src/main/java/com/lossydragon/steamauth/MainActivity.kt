@@ -2,58 +2,96 @@ package com.lossydragon.steamauth
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
+import android.view.WindowManager
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
-import androidx.navigation.findNavController
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.lossydragon.steamauth.steamauth.MaFileLoader
+import com.lossydragon.steamauth.ui.AppTheme
 import com.lossydragon.steamauth.utils.PrefsManager
-import com.lossydragon.steamauth.utils.deleteAccount
 import com.lossydragon.steamauth.utils.requestPermissionsReasoning
 import com.lossydragon.steamauth.utils.showInfo
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 import java.io.InputStream
 
+// TODO: Nav/Status bar color
+// TODO: onResult deprecation
+class MainViewModel : ViewModel() {
 
-/**
- * Main Activity to contain the fragments and provide basic functions
- */
-class MainActivity : AppCompatActivity() {
+    private var _showTotpScreen = MutableLiveData<Boolean>()
+    val showTotpScreen: LiveData<Boolean> = _showTotpScreen
+
+    fun showTotpScreen(value: Boolean) {
+        _showTotpScreen.value = value
+    }
+}
+
+class MainActivity : ComponentActivity() {
 
     companion object {
         private const val REQUEST_CODE = 447
     }
 
+    private val viewModel: MainViewModel by viewModels()
+    private var clipboard: ClipboardManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-        fab.setOnClickListener {
-            checkPermissions()
+        clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        setContent {
+            val hasSecret = PrefsManager.sharedSecret.isNotEmpty()
+            val showTotp = viewModel.showTotpScreen.observeAsState(hasSecret)
+            if (!showTotp.value) {
+                AppTheme {
+                    WelcomeScreen(
+                        onCleared = { finishAffinity() },
+                        onFabClick = { checkPermissions() })
+                }
+            } else {
+                // Block screenshots and overview preview
+                window.setFlags(
+                    WindowManager.LayoutParams.FLAG_SECURE,
+                    WindowManager.LayoutParams.FLAG_SECURE
+                )
+                AppTheme {
+                    TotpScreen(
+                        name = PrefsManager.accountName,
+                        revocation = PrefsManager.revocationCode,
+                        onCleared = { finishAffinity() },
+                        onLongClick = {
+                            val clip = ClipData.newPlainText(getString(R.string.clip_label), it)
+                            clipboard?.setPrimaryClip(clip)
+                            Toast.makeText(
+                                this,
+                                getString(R.string.toast_copied),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                    )
+                }
+            }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_delete -> deleteAccount()
-            R.id.action_info -> showInfo()
-            else -> super.onOptionsItemSelected(item)
-        }
-        return true
+    override fun onDestroy() {
+        super.onDestroy()
+        clipboard = null
     }
 
     override fun onRequestPermissionsResult(
@@ -64,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 42) {
             if (PrefsManager.firstTime) {
-                showInfo()
+                showInfo { finishAffinity() }
             }
         }
     }
@@ -82,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                     val result = MaFileLoader.importMaFile(jsonString)
 
                     if (result) {
-                        findNavController(R.id.nav_host_fragment).navigate(R.id.SecondFragment)
+                        viewModel.showTotpScreen(true)
                     }
 
                 } catch (e: IOException) {
@@ -113,7 +151,7 @@ class MainActivity : AppCompatActivity() {
     private fun addAccount() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/json" // This is just dumb
+            type = "*/*" // This is just dumb
         }
         startActivityForResult(intent, REQUEST_CODE)
     }
@@ -122,7 +160,4 @@ class MainActivity : AppCompatActivity() {
         val inputStream: InputStream? = contentResolver.openInputStream(uri)
         return inputStream!!.bufferedReader().readText()
     }
-
-    // Return the FAB view object to a fragment
-    fun getFloatingActionButton(): ExtendedFloatingActionButton? = fab
 }

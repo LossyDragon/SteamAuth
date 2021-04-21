@@ -45,9 +45,9 @@ object SteamGuardAccount {
 
             var codePoint: Int =
                 hashedData[b].toInt() and 0x7F shl 24 or
-                        (hashedData[b + 1].toInt() and 0xFF shl 16) or
-                        (hashedData[b + 2].toInt() and 0xFF shl 8) or
-                        (hashedData[b + 3].toInt() and 0xFF)
+                    (hashedData[b + 1].toInt() and 0xFF shl 16) or
+                    (hashedData[b + 2].toInt() and 0xFF shl 8) or
+                    (hashedData[b + 3].toInt() and 0xFF)
 
             val codeArray = ByteArray(5)
             for (i in 0..4) {

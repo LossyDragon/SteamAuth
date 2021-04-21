@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Steam Auth</string>
-    <string name="action_settings">Settings</string>
-
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">Welcome Fragment</string>
-    <string name="second_fragment_label">TOTP Fragment</string>
 
     <!-- Main Application Strings -->
     <string name="toast_copied">Copied!</string>
@@ -31,12 +26,8 @@
         This application only requires Read Storage permissions. Used only for the dialog file picker.\n\n
         Press OK to continue\n
         Press EXIT to close the application.
-
     </string>
-    <string name="action_select">Select</string>
-    <string name="dialog_add_account_title">Select .maFile</string>
     <string name="button_revocation">Show Revocation Code</string>
     <string name="toast_revocation">Revocation code: %s</string>
     <string name="totp_title">Your Steam Guard code:</string>
-    <string name="totp_code_unknown">N/A</string>
 </resources>
