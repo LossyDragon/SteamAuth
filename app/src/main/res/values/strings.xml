@@ -18,14 +18,14 @@
     <string name="action_exit">Exit</string>
     <string name="dialog_info_title">Info</string>
     <string name="dialog_info_message">Steam Auth is a basic application to easily display one time
-        codes [TOTP] via a .maFile from the official Steam app or other 3rd party apps.\n\n
-        This application nor the author is NOT affiliated with Steam™ in any way.\n\n
-        This application is to be used at your own risk! It does contain sensitive information to your steam account if allowed to import a .maFile.\n\n
-        The application is under the MIT license, complying with functions sampled from other apps.\n\n
-        Your .maFile should be backed up securely and safely via your own means. It contains your Revocation code to disable Steam Authenticator officially through Steam.\n\n
-        This application only requires Read Storage permissions. Used only for the dialog file picker.\n\n
-        Press OK to continue\n
-        Press EXIT to close the application.
+        codes [TOTP] via a .maFile from the official Steam app or other 3rd party apps.
+        \n\nThis application nor the author is NOT affiliated with Steam™ in any way.
+        \n\nThis application is to be used at your own risk! It does contain sensitive information to your steam account if allowed to import a .maFile.
+        \n\nThe application is under the MIT license, complying with functions sampled from other apps.\n\n
+        Your .maFile should be backed up securely and safely via your own means. It contains your Revocation code to disable Steam Authenticator officially through Steam.
+        \n\nThis application only requires Read Storage permissions. Used only for the dialog file picker.
+        \n\nPress OK to continue
+        \nPress EXIT to close the application.
     </string>
     <string name="button_revocation">Show Revocation Code</string>
     <string name="toast_revocation">Revocation code: %s</string>
