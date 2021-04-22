@@ -139,7 +139,7 @@ fun TotpScreen(
                 )
                 Text(
                     modifier = Modifier.combinedClickable(
-                        onClick = {/* no-op */ },
+                        onClick = { /* no-op */ },
                         onLongClick = {
                             onLongClick(progress.value.second)
                         }),

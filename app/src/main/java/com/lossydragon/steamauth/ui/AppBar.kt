@@ -18,6 +18,7 @@ fun AppBar(
                 color = Color.White
             )
         },
+        backgroundColor = primary,
         actions = { MenuActions(onCleared) },
     )
 }

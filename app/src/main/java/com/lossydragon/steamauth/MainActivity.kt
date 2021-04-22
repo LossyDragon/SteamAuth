@@ -28,7 +28,6 @@ import com.lossydragon.steamauth.utils.showInfo
 import java.io.IOException
 import java.io.InputStream
 
-// TODO: Nav/Status bar color
 // TODO: onResult deprecation
 class MainViewModel : ViewModel() {
 
