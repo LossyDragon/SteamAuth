@@ -6,11 +6,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onCancel
 import com.lossydragon.steamauth.R
 
-fun requestPermissionsReasoning() {
-    // TODO
-}
-
 fun Context.showInfo(
+    onAccept: () -> Unit,
     onCleared: () -> Unit
 ) {
     MaterialDialog(this).show {
@@ -18,6 +15,7 @@ fun Context.showInfo(
         message(R.string.dialog_info_message)
         positiveButton(R.string.action_ok) {
             PrefsManager.firstTime = false
+            onAccept()
         }
         negativeButton(R.string.action_exit) {
             PrefsManager.firstTime = true

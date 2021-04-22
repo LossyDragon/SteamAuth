@@ -27,7 +27,7 @@ fun MenuActions(
             contentDescription = stringResource(id = R.string.action_delete)
         )
     }
-    IconButton(onClick = { context.showInfo(onCleared) }) {
+    IconButton(onClick = { context.showInfo(onAccept = {}, onCleared = { onCleared() }) }) {
         Icon(
             imageVector = Icons.Default.Info,
             tint = Color.White,
