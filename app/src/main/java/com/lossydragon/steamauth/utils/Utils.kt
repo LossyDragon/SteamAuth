@@ -8,6 +8,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
 
 fun String.upperCase(): String = this.uppercase(Locale.getDefault())
 
@@ -23,7 +24,7 @@ fun totpFlow() = flow {
             val codeTime: Double = 30.0 - System.currentTimeMillis() / 1000.0 % 30.0
             val currentTime: Long = System.currentTimeMillis() / 1000L
             val validityTime = 30.0 - codeTime
-            progress = (3000.0 * (validityTime / 30.0)).toFloat() / 3000 // :)
+            progress = (validityTime / 30.0).toFloat()
 
             val newCode = timeNewCode > validityTime
             timeNewCode = validityTime
@@ -33,8 +34,8 @@ fun totpFlow() = flow {
                 code = SteamGuardAccount.generateSteamGuardCodeForTime(secret, currentTime)
             }
 
+            delay(10) // Delays before emit, while active.
             emit(Pair(progress, code))
-            delay(50)
         }
     }
 }

@@ -21,7 +21,7 @@ object SteamGuardAccount {
 
     fun generateSteamGuardCodeForTime(shared_secret: String, time: Long): String {
 
-        if (shared_secret.isEmpty() || shared_secret.isBlank()) {
+        if (shared_secret.isBlank()) {
             return ERROR
         }
 
@@ -50,10 +50,10 @@ object SteamGuardAccount {
                     (hashedData[b + 3].toInt() and 0xFF)
 
             val codeArray = ByteArray(5)
+            val translationSize = STEAM_GUARD_CODE_TRANSLATIONS.size
             for (i in 0..4) {
-                codeArray[i] =
-                    STEAM_GUARD_CODE_TRANSLATIONS[codePoint % STEAM_GUARD_CODE_TRANSLATIONS.size]
-                codePoint /= STEAM_GUARD_CODE_TRANSLATIONS.size
+                codeArray[i] = STEAM_GUARD_CODE_TRANSLATIONS[codePoint % translationSize]
+                codePoint /= translationSize
             }
 
             return codeArray.toString(Charsets.UTF_8)
