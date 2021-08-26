@@ -1,5 +1,6 @@
 package com.lossydragon.steamauth
 
+import android.app.Activity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -10,7 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,6 +24,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.lossydragon.steamauth.ui.AppBar
 import com.lossydragon.steamauth.ui.Snackbar
+import com.lossydragon.steamauth.utils.toast
 import com.lossydragon.steamauth.utils.totpFlow
 import com.lossydragon.steamauth.utils.upperCase
 import kotlinx.coroutines.flow.Flow
@@ -42,7 +47,9 @@ fun WelcomeScreen(
                         contentDescription = stringResource(id = R.string.fab_import_account),
                     )
                 },
-                text = { Text(text = stringResource(id = R.string.fab_import_account).upperCase()) },
+                text = {
+                    Text(text = stringResource(id = R.string.fab_import_account).upperCase())
+                },
                 onClick = { onFabClick() },
                 elevation = FloatingActionButtonDefaults.elevation(8.dp),
                 contentColor = Color.White,
@@ -69,18 +76,17 @@ fun WelcomeScreen(
 fun TotpScreen(
     name: String,
     revocation: String,
-    onCleared: () -> Unit,
-    onLongClick: (text: String) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val accountName by remember { mutableStateOf(name) }
     val revocationCode by remember { mutableStateOf(revocation) }
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = {
-            AppBar(onCleared = { onCleared() })
-        },
+        topBar = { AppBar(onCleared = { (context as Activity).finishAffinity() }) },
         scaffoldState = scaffoldState,
         snackbarHost = { scaffoldState.snackbarHostState }
     ) {
@@ -131,6 +137,7 @@ fun TotpScreen(
             ) {
                 val flow: Flow<Pair<Float, String>> = totpFlow()
                 val progress = flow.collectAsState(initial = Pair(.5f, "STEAM"))
+                val string = stringResource(id = R.string.toast_copied)
 
                 CircularProgressIndicator(
                     progress = progress.value.first,
@@ -141,8 +148,12 @@ fun TotpScreen(
                     modifier = Modifier.combinedClickable(
                         onClick = { /* no-op */ },
                         onLongClick = {
-                            onLongClick(progress.value.second)
-                        }),
+                            val value = buildAnnotatedString { append(progress.value.second) }
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            clipboard.setText(value)
+                            context.toast(string)
+                        }
+                    ),
                     text = progress.value.second,
                     fontWeight = FontWeight.Medium,
                     fontSize = 64.sp
@@ -158,9 +169,7 @@ fun TotpScreen(
                 },
                 onClick = {
                     scope.launch {
-                        scaffoldState.snackbarHostState.showSnackbar(
-                            message = revocationText,
-                        )
+                        scaffoldState.snackbarHostState.showSnackbar(message = revocationText)
                     }
                 }
             ) {
@@ -194,5 +203,5 @@ fun WelcomeScreenPreview() {
 @Preview
 @Composable
 fun TotpScreenPreview() {
-    TotpScreen(name = "N/A", revocation = "", onCleared = {}, onLongClick = {})
+    TotpScreen(name = "N/A", revocation = "")
 }

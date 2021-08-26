@@ -18,9 +18,11 @@ fun MenuActions(
     onCleared: () -> Unit,
 ) {
     val context = LocalContext.current
-    IconButton(onClick = {
-        context.deleteAccount(onCleared)
-    }) {
+    IconButton(
+        onClick = {
+            context.deleteAccount(onCleared)
+        }
+    ) {
         Icon(
             imageVector = Icons.Default.Delete,
             tint = Color.White,

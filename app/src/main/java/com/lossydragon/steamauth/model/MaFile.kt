@@ -1,4 +1,4 @@
-package com.lossydragon.steamauth.utils
+package com.lossydragon.steamauth.model
 
 /**
  * Data class containing the format for a .maFile from: Steam, Desktop Auth, SteamTrade-aegamsi

@@ -1,13 +1,17 @@
 package com.lossydragon.steamauth.utils
 
+import android.content.Context
+import android.widget.Toast
 import com.lossydragon.steamauth.steamauth.SteamGuardAccount
+import java.util.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import java.util.*
 
-fun String.upperCase(): String = this.toUpperCase(Locale.getDefault())
+fun String.upperCase(): String = this.uppercase(Locale.getDefault())
+
+fun Context.toast(string: String) = Toast.makeText(this, string, Toast.LENGTH_LONG).show()
 
 fun totpFlow() = flow {
     var progress: Float

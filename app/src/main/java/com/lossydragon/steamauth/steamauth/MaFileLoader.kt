@@ -2,7 +2,7 @@ package com.lossydragon.steamauth.steamauth
 
 import android.util.Log
 import com.google.gson.Gson
-import com.lossydragon.steamauth.utils.MaFileInfo
+import com.lossydragon.steamauth.model.MaFileInfo
 import com.lossydragon.steamauth.utils.PrefsManager
 
 object MaFileLoader {
@@ -19,7 +19,7 @@ object MaFileLoader {
         try {
             val maFileInfo = Gson().fromJson(file, MaFileInfo::class.java)
 
-            //Save the JSON data to preferences
+            // Save the JSON data to preferences
             PrefsManager.run {
                 /* MaFile */
                 accountName = maFileInfo.account_name
