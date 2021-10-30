@@ -2,13 +2,25 @@ package com.lossydragon.steamauth.utils
 
 import android.content.Context
 import android.widget.Toast
+import com.lossydragon.steamauth.R
 import com.lossydragon.steamauth.steamauth.SteamGuardAccount
 import java.util.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
+
+fun Context.removeAccount(block: () -> Unit) {
+    val isCleared = PrefsManager.deletePrefs()
+    if (isCleared)
+        block()
+    else
+        Toast.makeText(
+            this,
+            R.string.toast_delete_failed,
+            Toast.LENGTH_LONG
+        ).show()
+}
 
 fun String.upperCase(): String = this.uppercase(Locale.getDefault())
 

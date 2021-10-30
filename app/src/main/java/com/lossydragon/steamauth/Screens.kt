@@ -1,18 +1,20 @@
 package com.lossydragon.steamauth
 
-import android.app.Activity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.*
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -23,21 +25,21 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.lossydragon.steamauth.ui.AppBar
-import com.lossydragon.steamauth.ui.Snackbar
 import com.lossydragon.steamauth.utils.toast
 import com.lossydragon.steamauth.utils.totpFlow
 import com.lossydragon.steamauth.utils.upperCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomeScreen(
     onCleared: () -> Unit,
+    onShowDialog: () -> Unit,
     onFabClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
-            AppBar(onCleared = { onCleared() })
+            AppBar(onCleared = onCleared, onShowDialog = onShowDialog)
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -51,9 +53,9 @@ fun WelcomeScreen(
                     Text(text = stringResource(id = R.string.fab_import_account).upperCase())
                 },
                 onClick = { onFabClick() },
-                elevation = FloatingActionButtonDefaults.elevation(8.dp),
-                contentColor = Color.White,
-                backgroundColor = MaterialTheme.colors.primary,
+//                elevation = FloatingActionButtonDefaults.elevation(8.dp),
+//                contentColor = Color.White,
+//                backgroundColor = MaterialTheme.colors.primary,
             )
         },
     ) {
@@ -71,11 +73,13 @@ fun WelcomeScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TotpScreen(
     name: String,
     revocation: String,
+    onShowDialog: () -> Unit,
+    onCleared: () -> Unit,
 ) {
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
@@ -83,15 +87,20 @@ fun TotpScreen(
     val accountName by remember { mutableStateOf(name) }
     val revocationCode by remember { mutableStateOf(revocation) }
     val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
+//    val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = { AppBar(onCleared = { (context as Activity).finishAffinity() }) },
+        topBar = {
+            AppBar(
+                onCleared = onCleared,
+                onShowDialog = onShowDialog
+            )
+        },
         scaffoldState = scaffoldState,
-        snackbarHost = { scaffoldState.snackbarHostState }
+//        snackbarHost = { scaffoldState.snackbarHostState }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (info, totp, button, snack) = createRefs()
+            val (info, totp, button) = createRefs()
 
             Column(
                 modifier = Modifier.constrainAs(info) {
@@ -140,6 +149,7 @@ fun TotpScreen(
                 val string = stringResource(id = R.string.toast_copied)
 
                 CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
                     progress = progress.value.first,
                     modifier = Modifier.size(300.dp),
                     strokeWidth = 8.dp
@@ -168,9 +178,10 @@ fun TotpScreen(
                     end.linkTo(parent.end)
                 },
                 onClick = {
-                    scope.launch {
-                        scaffoldState.snackbarHostState.showSnackbar(message = revocationText)
-                    }
+                    context.toast(revocationText)
+//                    scope.launch {
+//                        scaffoldState.snackbarHostState.showSnackbar(message = revocationText)
+//                    }
                 }
             ) {
                 Text(
@@ -179,13 +190,13 @@ fun TotpScreen(
                 )
             }
 
-            Snackbar(
-                modifier = Modifier.constrainAs(snack) {
-                    width = Dimension.fillToConstraints
-                    bottom.linkTo(parent.bottom)
-                },
-                snackBarState = scaffoldState.snackbarHostState,
-            )
+//            Snackbar(
+//                modifier = Modifier.constrainAs(snack) {
+//                    width = Dimension.fillToConstraints
+//                    bottom.linkTo(parent.bottom)
+//                },
+//                snackBarState = scaffoldState.snackbarHostState,
+//            )
         }
     }
 }
@@ -197,11 +208,11 @@ fun TotpScreen(
 @Preview
 @Composable
 fun WelcomeScreenPreview() {
-    WelcomeScreen({}, {})
+    WelcomeScreen({}, {}, {})
 }
 
 @Preview
 @Composable
 fun TotpScreenPreview() {
-    TotpScreen(name = "N/A", revocation = "")
+    TotpScreen(name = "N/A", revocation = "", onShowDialog = {}, onCleared = {})
 }

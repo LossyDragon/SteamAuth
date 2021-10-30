@@ -16,8 +16,10 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.livedata.observeAsState
 import com.lossydragon.steamauth.steamauth.MaFileLoader
 import com.lossydragon.steamauth.ui.AppTheme
+import com.lossydragon.steamauth.ui.DialogMessage
+import com.lossydragon.steamauth.ui.DialogRemoveAccount
 import com.lossydragon.steamauth.utils.PrefsManager
-import com.lossydragon.steamauth.utils.showInfo
+import com.lossydragon.steamauth.utils.removeAccount
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -29,10 +31,7 @@ class MainActivity : ComponentActivity() {
     private val permissions = registerForActivityResult(RequestPermission()) { perm ->
         if (perm) {
             if (PrefsManager.firstTime) {
-                showInfo(
-                    onAccept = { addAccount() },
-                    onCleared = { finishAffinity() }
-                )
+                viewModel.showInfoDialog(true)
             } else {
                 addAccount()
             }
@@ -68,21 +67,54 @@ class MainActivity : ComponentActivity() {
         setContent {
             val hasSecret = PrefsManager.sharedSecret.isNotEmpty()
             val showTotp = viewModel.showTotpScreen.observeAsState(hasSecret)
+
+            /* Show Info Dialog */
+            val showInfoDialog = viewModel.showInfoDialog.observeAsState()
+            if (showInfoDialog.value == true) {
+                DialogMessage(
+                    onConfirm = {
+                        addAccount()
+                        viewModel.showInfoDialog(false)
+                    },
+                    onDismiss = {
+                        viewModel.showInfoDialog(false)
+                    }
+                )
+            }
+
+            /* Show Delete Account Dialog */
+            val showAccountDialog = viewModel.showAccountDialog.observeAsState()
+            if (showAccountDialog.value == true) {
+                DialogRemoveAccount(
+                    onConfirm = {
+                        removeAccount {
+                            finishAffinity()
+                        }
+                        viewModel.showAccountDialog(false)
+                    },
+                    onDismiss = { viewModel.showAccountDialog(false) }
+                )
+            }
+
             if (!showTotp.value) {
                 AppTheme {
                     WelcomeScreen(
                         onCleared = { finishAffinity() },
+                        onShowDialog = { viewModel.showInfoDialog(true) },
                         onFabClick = { checkPermissions() }
                     )
                 }
             } else {
                 // Block screenshots and overview preview
-                window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
+                if (!BuildConfig.DEBUG)
+                    window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
 
                 AppTheme {
                     TotpScreen(
                         name = PrefsManager.accountName,
                         revocation = PrefsManager.revocationCode,
+                        onShowDialog = { viewModel.showInfoDialog(true) },
+                        onCleared = { viewModel.showAccountDialog(true) }
                     )
                 }
             }
