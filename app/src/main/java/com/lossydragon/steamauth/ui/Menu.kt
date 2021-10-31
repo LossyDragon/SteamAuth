@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.lossydragon.steamauth.R
 
@@ -20,7 +19,6 @@ fun MenuActions(
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            tint = Color.White,
             contentDescription = stringResource(id = R.string.action_delete)
         )
     }
@@ -29,7 +27,6 @@ fun MenuActions(
     ) {
         Icon(
             imageVector = Icons.Default.Info,
-            tint = Color.White,
             contentDescription = stringResource(id = R.string.action_info)
         )
     }

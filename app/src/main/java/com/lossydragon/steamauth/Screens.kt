@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -173,7 +174,7 @@ fun TotpScreen(
             val revocationText = stringResource(id = R.string.toast_revocation, revocationCode)
             Button(
                 modifier = Modifier.constrainAs(button) {
-                    bottom.linkTo(parent.bottom, 24.dp)
+                    bottom.linkTo(parent.bottom, 48.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
@@ -205,13 +206,13 @@ fun TotpScreen(
  * Previews *
  ************/
 
-@Preview
+@Preview(apiLevel = 31, device = Devices.PIXEL_4_XL, showSystemUi = true)
 @Composable
 fun WelcomeScreenPreview() {
     WelcomeScreen({}, {}, {})
 }
 
-@Preview
+@Preview(apiLevel = 31, device = Devices.PIXEL_4_XL, showSystemUi = true)
 @Composable
 fun TotpScreenPreview() {
     TotpScreen(name = "N/A", revocation = "", onShowDialog = {}, onCleared = {})

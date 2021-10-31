@@ -73,7 +73,9 @@ class MainActivity : ComponentActivity() {
             if (showInfoDialog.value == true) {
                 DialogMessage(
                     onConfirm = {
-                        addAccount()
+                        if (PrefsManager.firstTime)
+                            addAccount()
+
                         viewModel.showInfoDialog(false)
                     },
                     onDismiss = {

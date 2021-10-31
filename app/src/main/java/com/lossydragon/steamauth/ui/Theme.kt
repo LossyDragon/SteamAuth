@@ -27,7 +27,7 @@ fun AppTheme(
 
     MaterialTheme(colorScheme = colorScheme) {
 
-        val systemsColor = MaterialTheme.colorScheme.secondary
+        val systemsColor = MaterialTheme.colorScheme.background
         val uiController = rememberSystemUiController()
 
         SideEffect {
