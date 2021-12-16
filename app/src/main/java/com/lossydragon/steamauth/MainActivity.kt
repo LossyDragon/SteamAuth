@@ -1,143 +1,133 @@
 package com.lossydragon.steamauth
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager.LayoutParams
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.activity.viewModels
-import androidx.compose.runtime.livedata.observeAsState
-import com.lossydragon.steamauth.steamauth.MaFileLoader
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.systemBarsPadding
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.lossydragon.steamauth.ui.AppTheme
-import com.lossydragon.steamauth.ui.DialogMessage
-import com.lossydragon.steamauth.ui.DialogRemoveAccount
-import com.lossydragon.steamauth.utils.PrefsManager
-import com.lossydragon.steamauth.utils.removeAccount
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
+import com.lossydragon.steamauth.utils.getPermissionText
+import com.lossydragon.steamauth.utils.waterfallPadding
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
-
-    private val permissions = registerForActivityResult(RequestPermission()) { perm ->
-        if (perm) {
-            if (PrefsManager.firstTime) {
-                viewModel.showInfoDialog(true)
-            } else {
-                addAccount()
-            }
-        } else {
-            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
-        }
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
     }
 
-    private val requestDocument = registerForActivityResult(StartActivityForResult()) { result ->
-        val currentUri: Uri
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.let {
-                currentUri = it.data!!
-
-                try {
-                    val jsonString: String = readFileContent(currentUri) ?: return@let
-                    val wasImported = MaFileLoader.importMaFile(jsonString)
-
-                    if (wasImported) {
-                        viewModel.showTotpScreen(true)
-                    }
-                } catch (e: IOException) {
-                    Log.w(this::class.java.simpleName, e.message.toString())
-                    return@let
-                }
-            }
-        }
-    }
-
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Block screenshots and overview preview
+        if (!BuildConfig.DEBUG)
+            window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
+
+        Log.d(TAG, "onCreate: ")
         setContent {
-            val hasSecret = PrefsManager.sharedSecret.isNotEmpty()
-            val showTotp = viewModel.showTotpScreen.observeAsState(hasSecret)
+            val permissions = rememberPermissionState(READ_EXTERNAL_STORAGE)
 
-            /* Show Info Dialog */
-            val showInfoDialog = viewModel.showInfoDialog.observeAsState()
-            if (showInfoDialog.value == true) {
-                DialogMessage(
-                    onConfirm = {
-                        if (PrefsManager.firstTime)
-                            addAccount()
-
-                        viewModel.showInfoDialog(false)
-                    },
-                    onDismiss = {
-                        viewModel.showInfoDialog(false)
-                    }
-                )
-            }
-
-            /* Show Delete Account Dialog */
-            val showAccountDialog = viewModel.showAccountDialog.observeAsState()
-            if (showAccountDialog.value == true) {
-                DialogRemoveAccount(
-                    onConfirm = {
-                        removeAccount {
-                            finishAffinity()
+            ProvideWindowInsets {
+                AppTheme {
+                    when {
+                        permissions.hasPermission -> {
+                            // Permission Granted
+                            NavigationScreen()
                         }
-                        viewModel.showAccountDialog(false)
-                    },
-                    onDismiss = { viewModel.showAccountDialog(false) }
-                )
-            }
-
-            if (!showTotp.value) {
-                AppTheme {
-                    WelcomeScreen(
-                        onCleared = { finishAffinity() },
-                        onShowDialog = { viewModel.showInfoDialog(true) },
-                        onFabClick = { checkPermissions() }
-                    )
-                }
-            } else {
-                // Block screenshots and overview preview
-                if (!BuildConfig.DEBUG)
-                    window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
-
-                AppTheme {
-                    TotpScreen(
-                        name = PrefsManager.accountName,
-                        revocation = PrefsManager.revocationCode,
-                        onShowDialog = { viewModel.showInfoDialog(true) },
-                        onCleared = { viewModel.showAccountDialog(true) }
-                    )
+                        permissions.shouldShowRationale || !permissions.permissionRequested -> {
+                            // Need Permission
+                            NeedPermissionsScreen(permissions)
+                        }
+                        else -> {
+                            // Permissions most-likely permanently denied.
+                            PermissionsDeniedScreen(permissions)
+                        }
+                    }
                 }
             }
         }
     }
+}
 
-    private fun checkPermissions() {
-        permissions.launch(READ_EXTERNAL_STORAGE)
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun NeedPermissionsScreen(permission: PermissionState) {
+    val appName = stringResource(id = R.string.app_name)
+    PermissionsScreen(
+        message = "The following permissions is needed for\n$appName to run properly: \n",
+        permissionsList = getPermissionText(permission),
+        buttonText = "Request permission"
+    ) {
+        permission.launchPermissionRequest()
     }
+}
 
-    private fun addAccount() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "*/*" // This is just dumb
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun PermissionsDeniedScreen(permission: PermissionState) {
+    val context = LocalContext.current
+    PermissionsScreen(
+        message = "Permissions denied.\nPlease manually grant permissions in Settings.\n",
+        permissionsList = getPermissionText(permission),
+        buttonText = "Open Settings"
+    ) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        intent.data = Uri.fromParts("package", context.packageName, null)
+        context.startActivity(intent)
+    }
+}
+
+@Composable
+private fun PermissionsScreen(
+    message: String,
+    permissionsList: AnnotatedString,
+    buttonText: String,
+    onClicked: () -> Unit
+) {
+    AppTheme {
+        Surface {
+            Column(
+                modifier = Modifier
+                    .waterfallPadding()
+                    .fillMaxSize()
+                    .systemBarsPadding(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(text = message)
+                Text(text = permissionsList)
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(onClick = onClicked) {
+                    Text(
+                        text = buttonText,
+                        color = Color.White
+                    )
+                }
+            }
         }
-        requestDocument.launch(intent)
-    }
-
-    @Throws(FileNotFoundException::class)
-    private fun readFileContent(uri: Uri): String? {
-        val inputStream: InputStream? = contentResolver.openInputStream(uri)
-        return inputStream?.bufferedReader()?.readText()
     }
 }

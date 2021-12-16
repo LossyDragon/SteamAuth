@@ -54,9 +54,6 @@ fun WelcomeScreen(
                     Text(text = stringResource(id = R.string.fab_import_account).upperCase())
                 },
                 onClick = { onFabClick() },
-//                elevation = FloatingActionButtonDefaults.elevation(8.dp),
-//                contentColor = Color.White,
-//                backgroundColor = MaterialTheme.colors.primary,
             )
         },
     ) {
@@ -76,7 +73,7 @@ fun WelcomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun TotpScreen(
+fun TwoFactorScreen(
     name: String,
     revocation: String,
     onShowDialog: () -> Unit,
@@ -87,8 +84,6 @@ fun TotpScreen(
     val haptic = LocalHapticFeedback.current
     val accountName by remember { mutableStateOf(name) }
     val revocationCode by remember { mutableStateOf(revocation) }
-    val scaffoldState = rememberScaffoldState()
-//    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -97,8 +92,6 @@ fun TotpScreen(
                 onShowDialog = onShowDialog
             )
         },
-        scaffoldState = scaffoldState,
-//        snackbarHost = { scaffoldState.snackbarHostState }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (info, totp, button) = createRefs()
@@ -113,7 +106,6 @@ fun TotpScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // accountName = PrefsManager.accountName
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -180,9 +172,6 @@ fun TotpScreen(
                 },
                 onClick = {
                     context.toast(revocationText)
-//                    scope.launch {
-//                        scaffoldState.snackbarHostState.showSnackbar(message = revocationText)
-//                    }
                 }
             ) {
                 Text(
@@ -190,14 +179,6 @@ fun TotpScreen(
                     color = Color.White
                 )
             }
-
-//            Snackbar(
-//                modifier = Modifier.constrainAs(snack) {
-//                    width = Dimension.fillToConstraints
-//                    bottom.linkTo(parent.bottom)
-//                },
-//                snackBarState = scaffoldState.snackbarHostState,
-//            )
         }
     }
 }
@@ -215,5 +196,5 @@ fun WelcomeScreenPreview() {
 @Preview(apiLevel = 31, device = Devices.PIXEL_4_XL, showSystemUi = true)
 @Composable
 fun TotpScreenPreview() {
-    TotpScreen(name = "N/A", revocation = "", onShowDialog = {}, onCleared = {})
+    TwoFactorScreen(name = "N/A", revocation = "", onShowDialog = {}, onCleared = {})
 }

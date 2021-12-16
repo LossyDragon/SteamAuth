@@ -1,5 +1,5 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="ComposeTheme" parent="Theme.Material3.DayNight.NoActionBar" />
+
 </resources>

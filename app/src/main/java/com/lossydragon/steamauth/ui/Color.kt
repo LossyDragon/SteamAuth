@@ -13,6 +13,4 @@ val lightColorScheme = lightColorScheme(
 
 val darkColorScheme = darkColorScheme(
     background = background,
-//    primary = primary,
-//    onBackground = Color.White,
 )
